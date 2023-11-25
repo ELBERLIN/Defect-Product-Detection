@@ -1,6 +1,6 @@
 #! D:\VSCODE\TFODCourse\tfod\Scripts\python.exe
 import os
-os.chdir('D:\\VSCode\\Defect-Detection-Product')
+os.chdir('D:\\VSCode\\TFODCourse')
 
 import object_detection
 import tensorflow as tf

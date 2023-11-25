@@ -1,6 +1,6 @@
 import os
 
-os.chdir("D:\\VSCode\\Defect-Detection-Product")
+os.chdir("D:\\VSCode\\TFODCourse")
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
@@ -310,6 +310,10 @@ def detect_defects(file_path):
         # cv2.putText(resized_image, title, title_pos, font, font_scale, font_color, 2, line_type)
 
         # Display the resized white image with the title and the unique detected labels centered
+        save_path = os.path.join("path/to/save/folder", f"detected_image{detect_defects.counter}.jpg")
+        plt.savefig(save_path)
+        detect_defects.counter += 1
+    
         plt.imshow(cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB))
         plt.title("Detected Labels")
         plt.axis("off")
@@ -318,3 +322,5 @@ def detect_defects(file_path):
 
 # Run the main event loop
 window.mainloop()
+
+detect_defects.counter = 1

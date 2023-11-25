@@ -1,7 +1,8 @@
 import os
-
-os.chdir("D:\\VSCode\\Defect-Detection-Product")
+import fpdf
+os.chdir("D:\\VSCode\\TFODCourse")
 import tensorflow as tf
+import pandas as pd
 from object_detection.utils import config_util
 from object_detection.protos import pipeline_pb2
 from google.protobuf import text_format
@@ -51,16 +52,20 @@ window.geometry("1290x720")
 
 image_count = 0
 
-def select_files():
+def handle_button_click(file_paths, button_num):
+    global image_count
+    image_count = 0
+    detect_defects(file_paths, button_num)
+    
+def select_files(button_num):
     file_paths = filedialog.askopenfilenames(
-        title="Select Image Files",
+        title=f"Select Image Files for Button {button_num}",
         filetypes=[("Image Files", "*.png *.jpg *.jpeg *.gif *.bmp *.ppm")],
-        initialdir=os.path.expanduser("~"),  # Set the initial directory
-        multiple=True,  # Allow multiple file selections
+        initialdir=os.path.expanduser("~"),
+        multiple=True,
     )
     if file_paths:
-        image_count = 0
-        detect_defects(file_paths)
+        handle_button_click(file_paths, button_num)
 
 
 label = tk.Label(
@@ -89,13 +94,20 @@ detected_labels_label.config(font=("ariel", 15))
 detected_labels_label.place(x=950, y=20)
 
 # Add a button to select and detect defects in an image file
-detect_button = ttk.Button(master=window, text="Detect Defects", command=select_files)
-detect_button.place(x=560, y=280)
+button1 = ttk.Button(master=window, text="Select Images for Button 1", command=lambda: select_files(1))
+button1.place(x=560, y=280)
 
-total_labels_count = {}
+button2 = ttk.Button(master=window, text="Select Images for Button 2", command=lambda: select_files(2))
+button2.place(x=560, y=320)
 
-def detect_defects(file_paths):
+total_labels_count1 = {}
+total_labels_count2 = {}
+
+detect_defects_counter = 1
+
+def detect_defects(file_paths,button_num):
     global image_count
+    global detect_defects_counter  
     if file_paths:
 
         CUSTOM_MODEL_NAME = "my_ssd_mobnet1"
@@ -257,7 +269,11 @@ def detect_defects(file_paths):
                     unique_labels.add(label)
 
                     # Increment the count for the label in the outer dictionary
-                    total_labels_count[label] = total_labels_count.get(label, 0) + 1
+                    if(button_num == 1):
+                        total_labels_count1[label] = total_labels_count1.get(label, 0) + 1
+                    if(button_num == 2):
+                        total_labels_count2[label] = total_labels_count2.get(label, 0) + 1
+
 
             # Display the image with detected labels on the side
             fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
@@ -333,12 +349,26 @@ def detect_defects(file_paths):
             # cv2.putText(resized_image, title, title_pos, font, font_scale, font_color, 2, line_type)
 
             # Display the resized white image with the title and the unique detected labels centered
+            
             plt.imshow(cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB))
             plt.title("Detected Labels")
             plt.axis("off")
             # plt.show()
             # Run the main event loop
 
+            # Save the figure
+            if (button_num == 1):
+                save_path = os.path.join("D:\\VSCode\\TFODCourse\\GUI\\Images_Result\\Button_1", f"detected_image{detect_defects_counter}.jpg")
+                plt.savefig(save_path)
+                
+            if(button_num == 2):
+                save_path = os.path.join("D:\\VSCode\\TFODCourse\\GUI\\Images_Result\\Button_2", f"detected_image{detect_defects_counter}.jpg")
+                plt.savefig(save_path)
+
+            detect_defects_counter += 1
+
+            # Close the plot to avoid displaying it
+            plt.close()
             image_count += 1
             
             # detected_labels_counts[f"Image {image_count}"] = len(unique_labels)
@@ -355,6 +385,26 @@ while True:
     except tk.TclError:
         break  # Break the loop if the window is closed
     
-print("Total Count of Each Label:")
-for label, count in total_labels_count.items():
+print("Total Count of Each Label1:")
+for label, count in total_labels_count1.items():
     print(f"{label}: {count}")
+print("Total Count of Each Label2:")
+for label, count in total_labels_count2.items():
+    print(f"{label}: {count}")
+
+df1 = pd.DataFrame(list(total_labels_count1.items()), columns=['Label', 'Count'])
+df2 = pd.DataFrame(list(total_labels_count2.items()), columns=['Label', 'Count'])
+
+# Write DataFrames to Excel
+excel_file1 = 'D:\\VSCode\\TFODCourse\\GUI\\Labels_Result_Button1.xlsx'
+df1.to_excel(excel_file1, index=False)
+print(f"Excel file for Button 1 created: {excel_file1}")
+
+excel_file2 = 'D:\\VSCode\\TFODCourse\\GUI\\Labels_Result_Button2.xlsx'
+df2.to_excel(excel_file2, index=False)
+print(f"Excel file for Button 2 created: {excel_file2}")
+
+script_path = 'D:\\VSCode\\TFODCourse\\GUI\\pdf.py'
+
+# Run the other script using subprocess
+subprocess.run(['python', script_path])
