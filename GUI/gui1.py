@@ -48,26 +48,42 @@ bg_image = bg_image.resize((1290, 720), Image.LANCZOS)
 background_image = ImageTk.PhotoImage(bg_image)
 background_label = tk.Label(window, image=background_image)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
-# window.configure(bg="linear-gradient(to bottom, #87CEEB, #F0F0F0)")
 
 # set the size of the window
 window.geometry("1290x720")
 
 image_count = 0
 
-# progress_bar = ttk.Progressbar(window, mode="determinate", length=400, style="TProgressbar")
-# progress_bar.place(x=420, y=480)
+custom_style = ttk.Style()
+custom_style.configure(
+    "Horizontal.TProgressbar",
+    troughcolor="blue",  # Set the background color
+    barcolor="blue",  # Set the progress bar color
+    troughrelief="flat",
+    bordercolor="white",
+    lightcolor="white",
+    darkcolor="black",
+)
 
-# detection_status_label = tk.Label(
-#     window, foreground="white", background="black", text=""
-# )
-# detection_status_label.config(font=("ariel", 15), width=20, height=2)
-# detection_status_label.place(x=520, y=400)
+# Create the progress bar with the custom style
+progress_bar = ttk.Progressbar(
+    window, mode="determinate", length=400, style="Horizontal.TProgressbar"
+)
+
+# Pack the progress bar into the window
+progress_bar.place(x=460, y=480)
+# progress_bar.pack()
+
+detection_status_label = tk.Label(
+    window, foreground="#00308F", background="#F8F2ED", text=""
+)
+detection_status_label.config(font=("ariel", 15), width=20, height=2)
+detection_status_label.place(x=550, y=400)
 
 
-# def update_progress_bar(value):
-#     progress_bar["value"] = value
-#     window.update()
+def update_progress_bar(value):
+    progress_bar["value"] = value
+    window.update()
 
 
 def handle_button_click(file_paths, button_num):
@@ -104,6 +120,7 @@ def select_files(button_num):
     if file_paths:
         handle_button_click(file_paths, button_num)
 
+
 def generate_pdf():
     # Your existing PDF generation code goes here
     # ...
@@ -113,8 +130,7 @@ def generate_pdf():
     print("Total Count of Each Label2:")
     for label, count in total_labels_count2.items():
         print(f"{label}: {count}")
-        
-        
+
     import os
 
     os.chdir("D:\\VSCode\\TFODCourse")
@@ -122,7 +138,7 @@ def generate_pdf():
     import matplotlib.pyplot as plt
     from fpdf import FPDF
     import cv2
-    
+
     df1 = pd.DataFrame(list(total_labels_count1.items()), columns=["Label", "Count"])
     df2 = pd.DataFrame(list(total_labels_count2.items()), columns=["Label", "Count"])
 
@@ -237,7 +253,6 @@ def generate_pdf():
     # Add images to the PDF
     pdf.ln(10)  # Add some space between table and images
 
-
     # Add images for Dataset 1
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(200, 10, txt="Batch 1 - Sample Images", ln=True)
@@ -246,14 +261,18 @@ def generate_pdf():
     # Concatenate images horizontally for Dataset 1
     images_folder1 = os.listdir(dataset1_folder)[:5]
     images_per_set = 3
-    
+
     for i in range(0, len(images_folder1), images_per_set):
-    # Select the current set of images
-        current_images = images_folder1[i:i + images_per_set]
+        # Select the current set of images
+        current_images = images_folder1[i : i + images_per_set]
 
         # Create a concatenated image for the current set
-        concatenated_image_path1 = f"temp_images_dataset_1_{i // images_per_set + 1}.png"
-        images1 = [cv2.imread(os.path.join(dataset1_folder, img)) for img in current_images]
+        concatenated_image_path1 = (
+            f"temp_images_dataset_1_{i // images_per_set + 1}.png"
+        )
+        images1 = [
+            cv2.imread(os.path.join(dataset1_folder, img)) for img in current_images
+        ]
         concatenated_image1 = cv2.hconcat(images1)
         cv2.imwrite(concatenated_image_path1, concatenated_image1)
 
@@ -265,96 +284,113 @@ def generate_pdf():
     # Add images for Dataset 2
     images_folder2 = os.listdir(dataset2_folder)[:5]
     images_per_set = 3
-    
+
     pdf.ln(20)
     pdf.set_font("Arial", style="B", size=14)
     pdf.cell(200, 10, txt="Batch 2 - Sample Images", ln=True)
     pdf.ln(2)
-    
+
     for i in range(0, len(images_folder2), images_per_set):
-    # Select the current set of images
-        current_images = images_folder2[i:i + images_per_set]
+        # Select the current set of images
+        current_images = images_folder2[i : i + images_per_set]
 
         # Create a concatenated image for the current set
-        concatenated_image_path2 = f"temp_images_dataset_1_{i // images_per_set + 1}.png"
-        images1 = [cv2.imread(os.path.join(dataset2_folder, img)) for img in current_images]
+        concatenated_image_path2 = (
+            f"temp_images_dataset_1_{i // images_per_set + 1}.png"
+        )
+        images1 = [
+            cv2.imread(os.path.join(dataset2_folder, img)) for img in current_images
+        ]
         concatenated_image2 = cv2.hconcat(images1)
         cv2.imwrite(concatenated_image_path2, concatenated_image2)
 
         # Add the concatenated image to the PDF
         pdf.image(concatenated_image_path2, x=10, y=None, w=200)
-        pdf.ln(8) 
-    # pdf.set_font("Arial", style="B", size=14)
-    # pdf.cell(200, 10, txt="Dataset 2 - Sample Images", ln=True)
-    # pdf.ln(2)
+        pdf.ln(8)
+        # pdf.set_font("Arial", style="B", size=14)
+        # pdf.cell(200, 10, txt="Dataset 2 - Sample Images", ln=True)
+        # pdf.ln(2)
 
-    # Concatenate images horizontally for Dataset 2
-    # images_folder2 = os.listdir(dataset2_folder)[:3]  # Select only the first 3 images
+        # Concatenate images horizontally for Dataset 2
+        # images_folder2 = os.listdir(dataset2_folder)[:3]  # Select only the first 3 images
 
-    # concatenated_image_path2 = "temp_images_dataset_2.png"
-    # images2 = [cv2.imread(os.path.join(dataset2_folder, img)) for img in images_folder2]
-    # concatenated_image2 = cv2.hconcat(images2)
-    # cv2.imwrite(concatenated_image_path2, concatenated_image2)
-    # pdf.image(concatenated_image_path2, x=10, y=None, w=200)
-    # Save the PDF
+        # concatenated_image_path2 = "temp_images_dataset_2.png"
+        # images2 = [cv2.imread(os.path.join(dataset2_folder, img)) for img in images_folder2]
+        # concatenated_image2 = cv2.hconcat(images2)
+        # cv2.imwrite(concatenated_image_path2, concatenated_image2)
+        # pdf.image(concatenated_image_path2, x=10, y=None, w=200)
+        # Save the PDF
         os.remove(concatenated_image_path2)
     pdf.output("label_histograms_and_counts_with_images_horizontal.pdf")
 
     # Remove temporary files
 
+
 pdf_instruction_label = tk.Label(
     window,
-    foreground="white",
-    background="black",
+    foreground="#0047AB",
+    background="white",
     text="Click the button to generate PDF",
 )
-pdf_instruction_label.config(font=("ariel", 12))
-pdf_instruction_label.place(x=520, y=550)
+pdf_instruction_label.config(font=("Helvetica", 12))
+pdf_instruction_label.place(x=550, y=550)
 
 # Add a button to create the PDF
 create_pdf_button = ttk.Button(
-    master=window, text="Create PDF", command=generate_pdf, style="TButton"
+    master=window, text="Create PDF", command=generate_pdf, style="Custom.TButton"
 )
 create_pdf_button.place(x=600, y=600)
 
-title_label = tk.Label(
+label = tk.Label(
     window, text="DEFECT PRODUCT DETECTION", pady=10, padx=20, borderwidth=2
 )
-title_label.config(
-    foreground="white", background="black", font=("Helvetica", 40, "bold"), pady=10
-)
-title_label.pack()
+label.config(foreground="navy", background="white", font=("Roboto", 45), pady=10)
+label.pack()
 
 # Add a label to the window
-instruction_label = tk.Label(
+label = tk.Label(
     window,
-    foreground="white",
-    background="black",
-    text="Click On the Button to Select your image file",
+    foreground="#0047AB",
+    background="white",
+    text="Click down the buttons to select the file",
 )
-instruction_label.config(font=("Helvetica", 15))
-instruction_label.place(x=435, y=220)
+label.config(font=("Helvetica", 24))
+label.place(x=390, y=220)
 
 # Create a label to display detected labels
 detected_labels_label = tk.Label(
     window, foreground="white", background="black", text=""
 )
-detected_labels_label.config(font=("ariel", 15))
+detected_labels_label.config(font=("ariel", 20))
 detected_labels_label.place(x=950, y=20)
+
+# Add a button to select and detect defects in an image file
+# Create a custom font with an increased size
+custom_font = ("Arial", 14)
 
 # Add a button to select and detect defects in an image file
 button1 = ttk.Button(
     master=window,
-    text="Select Images for Batch 1",
+    text="Select Batch1 images",
     command=lambda: select_files(1),
-    style="TButton",
+    style="Custom.TButton",
 )
-button1.place(x=560, y=280)
+button1.place(
+    x=200, y=320, width=220, height=50
+)  # Adjust width and height for the left side
 
 button2 = ttk.Button(
-    master=window, text="Select Images for Batch 2", command=lambda: select_files(2)
+    master=window,
+    text="Select Batch2 images",
+    command=lambda: select_files(2),
+    style="Custom.TButton",
 )
-button2.place(x=560, y=320)
+button2.place(x=900, y=320, width=220, height=50)
+
+style = ttk.Style()
+style.configure(
+    "Custom.TButton", font=custom_font, foreground="#3F00FF", label_background="#7DF9FF"
+)
 
 total_labels_count1 = {}
 total_labels_count2 = {}
@@ -649,6 +685,3 @@ while True:
         window.update()
     except tk.TclError:
         break  # Break the loop if the window is closed
-
-
-
